@@ -437,39 +437,61 @@ def extract_start_from_metadata(meta_path: Path):
 
 # ---------------------- New: header/footer detection ----------------------
 
-def mark_headers_footers(blocks: List[Dict[str,Any]], page_heights: Dict[int,float],
-                         header_frac=0.10, footer_frac=0.12, min_ratio=0.6):
-    """Mark repeating text near top/bottom as header/footer.
-    Footer uses the *bottom edge* (y+h) so low strips are caught."""
+def mark_headers_footers(
+    blocks: List[Dict[str, Any]],
+    page_heights: Dict[int, float],
+    header_frac: float = 0.10,
+    footer_frac: float = 0.12,
+    min_ratio: float = 0.6,
+):
+    """Mark repeating text near the top as headers and near the bottom as footers.
+
+    Uses a digits-agnostic normalization so repeating header lines with changing
+    page numbers are detected as the same header. Footer detection allows pure
+    page-number blocks as footers even if they don't repeat.
+    """
     if not blocks:
         return
-    page_count = len({b["page_index"] for b in blocks})
-    top_counts, bot_counts = {}, {}
+
+    def norm_key(t: str) -> str:
+        t = (t or "").strip()
+        t = re.sub(r"\s+", " ", t)
+        t = re.sub(r"\b\d+\b", "<NUM>", t)
+        return t.lower()
+
+    page_count = max(1, len({b["page_index"] for b in blocks}))
+    top_counts: Dict[str, int] = {}
+    bot_counts: Dict[str, int] = {}
 
     for b in blocks:
-        h = page_heights.get(b["page_index"], 842.0)
+        h = float(page_heights.get(b["page_index"], 842.0))
         top_y = h * header_frac
         bot_y = h * (1.0 - footer_frac)
-        txt = (b.get("text","") or "").strip()
-        if not txt:
+        raw = (b.get("text", "") or "").strip()
+        if not raw:
             continue
+        key = norm_key(raw)
         if b["y"] < top_y:
-            top_counts[txt] = top_counts.get(txt, 0) + 1
+            top_counts[key] = top_counts.get(key, 0) + 1
         if (b["y"] + b["h"]) > bot_y:
-            bot_counts[txt] = bot_counts.get(txt, 0) + 1
+            bot_counts[key] = bot_counts.get(key, 0) + 1
 
-    # page numbers count as footer even if not repeating
-    top_common = {t for t,c in top_counts.items() if c / page_count >= min_ratio and not re.fullmatch(r"\d{1,3}", t)}
-    bot_common = {t for t,c in bot_counts.items() if c / page_count >= min_ratio or re.fullmatch(r"\d{1,3}", t)}
+    top_common = {k for k, c in top_counts.items() if (c / page_count) >= min_ratio}
+    bot_common = {k for k, c in bot_counts.items() if (c / page_count) >= min_ratio}
 
     for b in blocks:
-        h = page_heights.get(b["page_index"], 842.0)
+        h = float(page_heights.get(b["page_index"], 842.0))
         top_y = h * header_frac
         bot_y = h * (1.0 - footer_frac)
-        txt = (b.get("text","") or "").strip()
-        if txt in top_common and b["y"] < top_y:
+        raw = (b.get("text", "") or "").strip()
+        key = norm_key(raw)
+        is_pure_page_num = bool(re.fullmatch(r"\d{1,4}", raw))
+        at_top = b["y"] < top_y
+        at_bottom = (b["y"] + b["h"]) > bot_y
+
+        if at_top and key in top_common and not is_pure_page_num:
             b["role"] = "header"
-        elif (txt in bot_common and (b["y"] + b["h"]) > bot_y) or re.fullmatch(r"\d{1,3}", txt):
+        elif at_bottom and (key in bot_common or is_pure_page_num):
             b["role"] = "footer"
         else:
             b.setdefault("role", "body")
@@ -575,7 +597,23 @@ def build_intermediate(pdf_path, out_path, metadata_path, start_page_cli, start_
                 blk["size"] = 0.0
 
             blk["runs"] = runs
-            blk["text"] = normalize_text(blk["text"])
+            blk["text"] = normalize_text(blk.get("text", ""))
+            # Fallbacks: if block text is empty, reconstruct from runs or use textbox extraction
+            if not blk["text"]:
+                if runs:
+                    try:
+                        joined = " ".join((r.get("text", "") or "").strip() for r in sorted(runs, key=lambda r: (float(r.get("y",0.0)), float(r.get("x",0.0)))))
+                        blk["text"] = normalize_text(joined)
+                    except Exception:
+                        pass
+                if not blk["text"]:
+                    try:
+                        rect = fitz.Rect(blk["x"], blk["y"], blk["x"] + blk["w"], blk["y"] + blk["h"])
+                        # page object available in this loop
+                        fallback = page.get_textbox(rect) or ""
+                        blk["text"] = normalize_text(fallback)
+                    except Exception:
+                        pass
             blk["page_w"], blk["page_h"] = w, h
             blk["page_index"] = i
             all_blocks.append(blk)
@@ -661,7 +699,8 @@ def build_intermediate(pdf_path, out_path, metadata_path, start_page_cli, start_
         pi = b["page_index"]
         if pi < start_page-1 or pi > stop_page_incl:
             continue
-        if top_clip_page is not None and pi == top_clip_page and top_clip_y is not None and b["y"] < top_clip_y - 0.5:
+        # Preserve headers on the start page even if above the anchor
+        if top_clip_page is not None and pi == top_clip_page and top_clip_y is not None and b["y"] < top_clip_y - 0.5 and b.get("role") != "header":
             continue
         if bottom_clip_page is not None and pi == bottom_clip_page and bottom_clip_y is not None and b["y"] >= bottom_clip_y - 0.5:
             continue
@@ -756,7 +795,13 @@ def build_intermediate(pdf_path, out_path, metadata_path, start_page_cli, start_
         if b.get("role"):
             attrs["role"] = b.get("role")
         el = etree.SubElement(page_el, "block", **attrs)
-        el.text = b.get("text","")
+        bt = b.get("text", "") or ""
+        if (not bt) and b.get("runs"):
+            try:
+                bt = normalize_text(" ".join((r.get("text", "") or "").strip() for r in sorted(b.get("runs"), key=lambda r: (float(r.get("y",0.0)), float(r.get("x",0.0))))))
+            except Exception:
+                bt = ""
+        el.text = bt
 
         # Optional inline spans
         if emit_spans and b.get("runs"):
