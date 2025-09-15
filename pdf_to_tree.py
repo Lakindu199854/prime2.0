@@ -37,6 +37,9 @@ RULE_RE            = re.compile(r"[_\-]{5,}\s*$")
 PAGE_NUM_RE        = re.compile(r"^\s*(\d{1,4})\s*$")
 FOOTNOTE_LINE_RE   = re.compile(r"^\s*(\d+)\s+(.+)")
 
+BULLET_RE = re.compile(r"^\s*([•·▪‣\-–—])\s+(.*)")
+
+
 def looks_like_new_list_start(text: str) -> bool:
     t = (text or "").strip()
     return bool(DECIMAL_START_ONLY.match(t) or ALPHA_START_ONLY.match(t))
@@ -472,6 +475,160 @@ def extract_start_from_metadata(meta_path: Path):
     return start_printed, start_heading
 
 
+def line_bbox(line_runs: List[Dict[str, Any]]) -> Tuple[float,float,float,float]:
+    xs=[]
+    for r in line_runs:
+        try:
+            x=float(r.get("x",0)); y=float(r.get("y",0))
+            w=float(r.get("w",0)); h=float(r.get("h",0))
+            xs.append((x,y,w,h))
+        except Exception:
+            pass
+    if not xs: return (0.0,0.0,0.0,0.0)
+    x0=min(x for x,_,_,_ in xs); y0=min(y for _,y,_,_ in xs)
+    x1=max(x+w for x,_,w,_ in xs); y1=max(y+h for _,y,_,h in xs)
+    return (x0,y0,x1-x0,y1-y0)
+
+def runs_to_lines_with_text(runs: List[Dict[str,Any]], y_tol: float = 2.0) -> List[Tuple[str, List[Dict[str,Any]]]]:
+    """Return [(normalized_text_for_line, runs_in_line), ...]"""
+    lines = group_spans_into_lines(runs or [], y_tol=y_tol)
+    out=[]
+    for ln in lines:
+        ln_sorted = sorted(ln, key=lambda r: (float(r.get("y",0.0)), float(r.get("x",0.0))))
+        txt = normalize_text("".join((r.get("text","") or "") for r in ln_sorted))
+        out.append((txt, ln_sorted))
+    return out
+
+def maybe_emit_inline_list(
+    body_el: etree._Element,
+    block: Dict[str, Any],
+    copy_inline_spans_from_runs
+) -> bool:
+    """
+    If a single PDF block contains both prose and list lines, split & emit them.
+    Returns True if it handled emission (caller should continue).
+    Heuristics:
+      - Detect lines starting with decimal '1. ', alpha 'a) ', or bullets '•, -, –, —, ·, ▪, ‣'
+      - Only trigger if the block mixes prose + list OR has 2+ list lines in the block
+    """
+    runs = block.get("runs") or []
+    if not runs:
+        return False
+
+    # build per-line texts
+    L = runs_to_lines_with_text(runs, y_tol=2.5)
+    if not L:
+        return False
+
+    # classify each line
+    segments = []  # (kind, content, line_runs, extra)  kind ∈ {"text","ol-dec","ol-alpha","ul"}
+    list_count = 0
+    text_count = 0
+    ol_first_num: Optional[int] = None
+    ol_first_alpha: Optional[int] = None
+    bullet_marker: Optional[str] = None
+
+    for line_text, line_runs in L:
+        m_dec = DECIMAL_RE.match(line_text)
+        m_alp = ALPHA_RE.match(line_text)
+        m_bul = BULLET_RE.match(line_text)
+
+        if m_dec:
+            list_count += 1
+            num = int(m_dec.group(1)); content = m_dec.group(2).strip()
+            if ol_first_num is None: ol_first_num = num
+            segments.append(("ol-dec", content, line_runs, num))
+        elif m_alp:
+            list_count += 1
+            alpha = m_alp.group(1); content = m_alp.group(2).strip()
+            start = ord(alpha) - ord('a') + 1
+            if ol_first_alpha is None: ol_first_alpha = start
+            segments.append(("ol-alpha", content, line_runs, start))
+        elif m_bul:
+            list_count += 1
+            bullet_marker = bullet_marker or m_bul.group(1)
+            content = m_bul.group(2).strip()
+            segments.append(("ul", content, line_runs, bullet_marker))
+        else:
+            text_count += 1
+            segments.append(("text", line_text, line_runs, None))
+
+    # only intervene if (prose + list) in same block OR block has 2+ list items
+    if not ((text_count > 0 and list_count > 0) or (list_count >= 2)):
+        return False
+
+    # emit: join all leading "text" lines up to first list line as one paragraph
+    def copy_coords_from_line(dst_el: etree._Element, ln_runs: List[Dict[str,Any]]):
+        x,y,w,h = line_bbox(ln_runs)
+        dst_el.set("x", f"{x:.2f}"); dst_el.set("y", f"{y:.2f}")
+        dst_el.set("w", f"{w:.2f}"); dst_el.set("h", f"{h:.2f}")
+        if block.get("font"): dst_el.set("font", f"{block.get('font')}")
+        if block.get("size"): dst_el.set("size", f"{block.get('size')}")
+
+    # 1) Intro paragraph (all leading non-list lines)
+    pos = 0
+    if segments and segments[0][0] == "text":
+        intro_lines = []
+        while pos < len(segments) and segments[pos][0] == "text":
+            intro_lines.append(segments[pos]); pos += 1
+        if intro_lines:
+            para = etree.SubElement(body_el, "paragraph")
+            copy_coords_from_line(para, intro_lines[0][2])
+            para.text = " ".join(s[1] for s in intro_lines if s[1])
+            # optional: keep inline runs for the first line
+            copy_inline_spans_from_runs(para, intro_lines[0][2])
+
+    # 2) One or more lists (we’ll group contiguous list lines of same kind)
+    while pos < len(segments):
+        kind = segments[pos][0]
+        if kind not in ("ol-dec", "ol-alpha", "ul"):
+            # trailing paragraph lines after lists
+            tail = []
+            while pos < len(segments) and segments[pos][0] == "text":
+                tail.append(segments[pos]); pos += 1
+            if tail:
+                para = etree.SubElement(body_el, "paragraph")
+                copy_coords_from_line(para, tail[0][2])
+                para.text = " ".join(s[1] for s in tail if s[1])
+                copy_inline_spans_from_runs(para, tail[0][2])
+            continue
+
+        # gather this list run
+        list_kind = kind
+        items = []
+        while pos < len(segments) and segments[pos][0] == list_kind:
+            items.append(segments[pos]); pos += 1
+
+        if list_kind == "ul":
+            lst = etree.SubElement(body_el, "list", type="unordered", marker=("bullet" if str(items[0][3]) in ("•","·","▪","‣") else "dash"))
+        elif list_kind == "ol-dec":
+            lst = etree.SubElement(body_el, "list", type="ordered", marker="decimal")
+            start_num = int(items[0][3]) if isinstance(items[0][3], int) else 1
+            lst.set("start", str(start_num))
+        else:
+            lst = etree.SubElement(body_el, "list", type="ordered", marker="lower-alpha")
+            start_alpha = int(items[0][3]) if isinstance(items[0][3], int) else 1
+            lst.set("start", str(start_alpha))
+
+        # items
+        for _, content, ln_runs, _extra in items:
+            it = etree.SubElement(lst, "item")
+            copy_coords_from_line(it, ln_runs)
+            p = etree.SubElement(it, "paragraph"); copy_coords_from_line(p, ln_runs)
+            p.text = content
+            copy_inline_spans_from_runs(p, ln_runs)
+
+        # compute list bbox for neatness
+        bb = bbox_union(lst.findall("./item"))
+        if bb:
+            x,y,w,h = bb
+            lst.set("x", f"{x:.2f}"); lst.set("y", f"{y:.2f}")
+            lst.set("w", f"{w:.2f}"); lst.set("h", f"{h:.2f}")
+
+    return True
+
+
+
 def build_tree_direct(
     pdf_path: Path, metadata_path: Optional[Path], start_page_cli: Optional[int],
     start_heading_cli: Optional[str], lang: str, heading_threshold: float,
@@ -754,6 +911,11 @@ def build_tree_direct(
 
             if RULE_RE.search(txt or ""):
                 add_separator(body_el, b); continue
+            
+            # split mixed blocks (paragraph + inline list) into proper structures
+            if maybe_emit_inline_list(body_el, b, copy_inline_spans_from_runs):
+                continue
+
 
             if b.get("kind")=="heading":
                 heading_markers_on_page.extend(extract_sup_markers_from_runs(b.get("runs")))
