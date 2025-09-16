@@ -5,8 +5,8 @@ Direct PDF -> Tree XML converter (no intermediate XML).
 Features:
 - Start anchor by heading or printed page (with metadata fallback)
 - Header & footer detection with repeat heuristics
-- Headings with levels, paragraphs, ordered lists (1. .. / a) ..)
-- Inline spans with bold/italic/sup/sub (runs derived from PyMuPDF rawdict)
+- Headings with levels, paragraphs, ordered lists (1. .. / a) ..) and unordered bullets (• / - / – / —, etc.)
+- Inline spans with bold/italic/sup/sub (from PyMuPDF rawdict)
 - Footnotes: bottom-band detection + markers in headings
 - Tables (PyMuPDF find_tables) + images (bbox only)
 - Printed page inference & page numbers in <footer>
@@ -36,13 +36,18 @@ ALPHA_START_ONLY   = re.compile(r"^\s*[a-z]\)\s+", re.I)
 RULE_RE            = re.compile(r"[_\-]{5,}\s*$")
 PAGE_NUM_RE        = re.compile(r"^\s*(\d{1,4})\s*$")
 FOOTNOTE_LINE_RE   = re.compile(r"^\s*(\d+)\s+(.+)")
-
-BULLET_RE = re.compile(r"^\s*([•·▪‣\-–—])\s+(.*)")
+# bullet set: dot bullets + hyphen family + minus sign; allow normal + NBSP spacing
+BULLET_RE          = re.compile(r"^[\s\u00A0]*([•·▪‣\-\u2010\u2011\u2012\u2013\u2014\u2212])[\s\u00A0]+(.*)")
+BULLET_START_ONLY  = re.compile(r"^[\s\u00A0]*[•·▪‣\-\u2010\u2011\u2012\u2013\u2014\u2212][\s\u00A0]+")
 
 
 def looks_like_new_list_start(text: str) -> bool:
     t = (text or "").strip()
-    return bool(DECIMAL_START_ONLY.match(t) or ALPHA_START_ONLY.match(t))
+    return bool(
+        DECIMAL_START_ONLY.match(t) or
+        ALPHA_START_ONLY.match(t)   or
+        BULLET_START_ONLY.match(t)
+    )
 
 def font_base(font_name: str) -> str:
     f = (font_name or "").lower()
@@ -229,6 +234,8 @@ def score_heading(b, page_w, body_size, thresh_regex_bonus=True):
     if centered: score += 1.0
     if gap_above >= 12: score += 1.0
     if allcaps_ratio(text) >= 0.6: score += 0.5
+    # bonus: lines that look like numbered headings (1., 1.1, 1.1.1 ...)
+    if re.match(r"^\s*\d+(?:\.\d+)*\s+\S", text): score += 0.8
     if thresh_regex_bonus and re.search(r"^(§\s*\d+|Einleitung|Inhaltsverzeichnis)$", text): score += 2.0
     if len(text) > 150: score -= 1.0
     return score
@@ -499,135 +506,190 @@ def runs_to_lines_with_text(runs: List[Dict[str,Any]], y_tol: float = 2.0) -> Li
         out.append((txt, ln_sorted))
     return out
 
-def maybe_emit_inline_list(
-    body_el: etree._Element,
-    block: Dict[str, Any],
-    copy_inline_spans_from_runs
-) -> bool:
+def maybe_emit_inline_list(body_el: etree._Element, block: Dict[str, Any], copy_inline_spans_from_runs) -> bool:
     """
-    If a single PDF block contains both prose and list lines, split & emit them.
-    Returns True if it handled emission (caller should continue).
-    Heuristics:
-      - Detect lines starting with decimal '1. ', alpha 'a) ', or bullets '•, -, –, —, ·, ▪, ‣'
-      - Only trigger if the block mixes prose + list OR has 2+ list lines in the block
+    Split & emit when a single block mixes prose and list lines.
+    1) Preferred: detect per visual line from runs (rawdict).
+    2) Fallback: split by inline bullets after punctuation/colon.
+    Returns True if it emitted content for this block.
     """
     runs = block.get("runs") or []
-    if not runs:
-        return False
 
-    # build per-line texts
-    L = runs_to_lines_with_text(runs, y_tol=2.5)
-    if not L:
-        return False
+    # ---------- Preferred: per-line from runs ----------
+    if runs:
+        L = runs_to_lines_with_text(runs, y_tol=2.5)  # [(line_text, line_runs), ...]
+        segments = []
+        list_count = text_count = 0
 
-    # classify each line
-    segments = []  # (kind, content, line_runs, extra)  kind ∈ {"text","ol-dec","ol-alpha","ul"}
-    list_count = 0
-    text_count = 0
-    ol_first_num: Optional[int] = None
-    ol_first_alpha: Optional[int] = None
-    bullet_marker: Optional[str] = None
+        for line_text, line_runs in L:
+            m_dec = DECIMAL_RE.match(line_text)
+            m_alp = ALPHA_RE.match(line_text)
+            m_bul = BULLET_RE.match(line_text)
 
-    for line_text, line_runs in L:
-        m_dec = DECIMAL_RE.match(line_text)
-        m_alp = ALPHA_RE.match(line_text)
-        m_bul = BULLET_RE.match(line_text)
+            if m_dec:
+                list_count += 1
+                segments.append(("ol-dec", m_dec.group(2).strip(), line_runs, int(m_dec.group(1))))
+            elif m_alp:
+                list_count += 1
+                start = ord(m_alp.group(1)) - ord('a') + 1
+                segments.append(("ol-alpha", m_alp.group(2).strip(), line_runs, start))
+            elif m_bul:
+                list_count += 1
+                segments.append(("ul", m_bul.group(2).strip(), line_runs, m_bul.group(1)))
+            else:
+                text_count += 1
+                segments.append(("text", line_text, line_runs, None))
 
-        if m_dec:
-            list_count += 1
-            num = int(m_dec.group(1)); content = m_dec.group(2).strip()
-            if ol_first_num is None: ol_first_num = num
-            segments.append(("ol-dec", content, line_runs, num))
-        elif m_alp:
-            list_count += 1
-            alpha = m_alp.group(1); content = m_alp.group(2).strip()
-            start = ord(alpha) - ord('a') + 1
-            if ol_first_alpha is None: ol_first_alpha = start
-            segments.append(("ol-alpha", content, line_runs, start))
-        elif m_bul:
-            list_count += 1
-            bullet_marker = bullet_marker or m_bul.group(1)
-            content = m_bul.group(2).strip()
-            segments.append(("ul", content, line_runs, bullet_marker))
-        else:
-            text_count += 1
-            segments.append(("text", line_text, line_runs, None))
+        if (text_count > 0 and list_count > 0) or (list_count >= 2):
+            # emit intro text (leading non-list lines)
+            def copy_coords_from_line(dst_el: etree._Element, ln_runs: List[Dict[str,Any]]):
+                x,y,w,h = line_bbox(ln_runs)
+                dst_el.set("x", f"{x:.2f}"); dst_el.set("y", f"{y:.2f}")
+                dst_el.set("w", f"{w:.2f}"); dst_el.set("h", f"{h:.2f}")
+                if block.get("font"): dst_el.set("font", f"{block.get('font')}")
+                if block.get("size"): dst_el.set("size", f"{block.get('size')}")
 
-    # only intervene if (prose + list) in same block OR block has 2+ list items
-    if not ((text_count > 0 and list_count > 0) or (list_count >= 2)):
-        return False
+            pos = 0
+            if segments and segments[0][0] == "text":
+                intro = []
+                while pos < len(segments) and segments[pos][0] == "text":
+                    intro.append(segments[pos]); pos += 1
+                if intro:
+                    para = etree.SubElement(body_el, "paragraph")
+                    copy_coords_from_line(para, intro[0][2])
+                    para.text = " ".join(s[1] for s in intro if s[1])
+                    copy_inline_spans_from_runs(para, intro[0][2])
 
-    # emit: join all leading "text" lines up to first list line as one paragraph
-    def copy_coords_from_line(dst_el: etree._Element, ln_runs: List[Dict[str,Any]]):
-        x,y,w,h = line_bbox(ln_runs)
-        dst_el.set("x", f"{x:.2f}"); dst_el.set("y", f"{y:.2f}")
-        dst_el.set("w", f"{w:.2f}"); dst_el.set("h", f"{h:.2f}")
-        if block.get("font"): dst_el.set("font", f"{block.get('font')}")
-        if block.get("size"): dst_el.set("size", f"{block.get('size')}")
+            # contiguous list runs of same kind
+            while pos < len(segments):
+                kind = segments[pos][0]
+                if kind not in ("ol-dec","ol-alpha","ul"):
+                    # trailing text after lists
+                    tail = []
+                    while pos < len(segments) and segments[pos][0] == "text":
+                        tail.append(segments[pos]); pos += 1
+                    if tail:
+                        para = etree.SubElement(body_el, "paragraph")
+                        copy_coords_from_line(para, tail[0][2])
+                        para.text = " ".join(s[1] for s in tail if s[1])
+                        copy_inline_spans_from_runs(para, tail[0][2])
+                    continue
 
-    # 1) Intro paragraph (all leading non-list lines)
-    pos = 0
-    if segments and segments[0][0] == "text":
-        intro_lines = []
-        while pos < len(segments) and segments[pos][0] == "text":
-            intro_lines.append(segments[pos]); pos += 1
-        if intro_lines:
-            para = etree.SubElement(body_el, "paragraph")
-            copy_coords_from_line(para, intro_lines[0][2])
-            para.text = " ".join(s[1] for s in intro_lines if s[1])
-            # optional: keep inline runs for the first line
-            copy_inline_spans_from_runs(para, intro_lines[0][2])
+                items = []
+                while pos < len(segments) and segments[pos][0] == kind:
+                    items.append(segments[pos]); pos += 1
 
-    # 2) One or more lists (we’ll group contiguous list lines of same kind)
-    while pos < len(segments):
-        kind = segments[pos][0]
-        if kind not in ("ol-dec", "ol-alpha", "ul"):
-            # trailing paragraph lines after lists
-            tail = []
-            while pos < len(segments) and segments[pos][0] == "text":
-                tail.append(segments[pos]); pos += 1
-            if tail:
-                para = etree.SubElement(body_el, "paragraph")
-                copy_coords_from_line(para, tail[0][2])
-                para.text = " ".join(s[1] for s in tail if s[1])
-                copy_inline_spans_from_runs(para, tail[0][2])
-            continue
+                if kind == "ul":
+                    mark = items[0][3]
+                    marker = "bullet" if str(mark) in ("•","·","▪","‣") else "dash"
+                    lst = etree.SubElement(body_el, "list", type="unordered", marker=marker)
+                elif kind == "ol-dec":
+                    lst = etree.SubElement(body_el, "list", type="ordered", marker="decimal")
+                    lst.set("start", str(int(items[0][3])))
+                else:
+                    lst = etree.SubElement(body_el, "list", type="ordered", marker="lower-alpha")
+                    lst.set("start", str(int(items[0][3])))
 
-        # gather this list run
-        list_kind = kind
-        items = []
-        while pos < len(segments) and segments[pos][0] == list_kind:
-            items.append(segments[pos]); pos += 1
+                for _, content, ln_runs, _extra in items:
+                    it = etree.SubElement(lst, "item")
+                    copy_coords_from_line(it, ln_runs)
+                    p = etree.SubElement(it, "paragraph")
+                    copy_coords_from_line(p, ln_runs)
+                    p.text = content
+                    copy_inline_spans_from_runs(p, ln_runs)
 
-        if list_kind == "ul":
-            lst = etree.SubElement(body_el, "list", type="unordered", marker=("bullet" if str(items[0][3]) in ("•","·","▪","‣") else "dash"))
-        elif list_kind == "ol-dec":
-            lst = etree.SubElement(body_el, "list", type="ordered", marker="decimal")
-            start_num = int(items[0][3]) if isinstance(items[0][3], int) else 1
-            lst.set("start", str(start_num))
-        else:
-            lst = etree.SubElement(body_el, "list", type="ordered", marker="lower-alpha")
-            start_alpha = int(items[0][3]) if isinstance(items[0][3], int) else 1
-            lst.set("start", str(start_alpha))
+                bb = bbox_union(lst.findall("./item"))
+                if bb:
+                    x,y,w,h = bb
+                    lst.set("x", f"{x:.2f}"); lst.set("y", f"{y:.2f}")
+                    lst.set("w", f"{w:.2f}"); lst.set("h", f"{h:.2f}")
+            return True
 
-        # items
-        for _, content, ln_runs, _extra in items:
+   # ---------- Fallback: text-only split (e.g., everything in one PDF line) ----------
+    full = (block.get("text") or "")
+
+    # helpers
+    def emit_paragraph(text: str):
+        if not text.strip():
+            return
+        para = etree.SubElement(body_el, "paragraph")
+        copy_block_coords_and_style(para, block)
+        para.text = normalize_text(text)
+
+    # 1) multiple DECIMAL items like: "1. foo 2. bar 3. baz 4. qux ..."
+    dec_pat = re.compile(r"(?<!\d)(\d+)\.\s+")  # make sure the dot is not part of "1.1"
+    dec_ms = list(dec_pat.finditer(full))
+
+    if len(dec_ms) >= 2:
+        # optional intro text before the first "1."
+        head = full[:dec_ms[0].start()].strip()
+        if head:
+            emit_paragraph(head)
+
+        # split items
+        lst = etree.SubElement(body_el, "list", type="ordered", marker="decimal")
+        start_num = int(dec_ms[0].group(1))
+        lst.set("start", str(start_num))
+
+        for i, m in enumerate(dec_ms):
+            start = m.end()
+            end   = dec_ms[i + 1].start() if i + 1 < len(dec_ms) else len(full)
+            chunk = full[start:end].strip()
+
+            # if the last chunk accidentally includes a "1.1 ..." style heading, cut it off
+            cut = re.search(r"\s\d+\.\d+\s", chunk)
+            if cut:
+                chunk = chunk[:cut.start()].rstrip()
+
             it = etree.SubElement(lst, "item")
-            copy_coords_from_line(it, ln_runs)
-            p = etree.SubElement(it, "paragraph"); copy_coords_from_line(p, ln_runs)
-            p.text = content
-            copy_inline_spans_from_runs(p, ln_runs)
+            copy_block_coords_and_style(it, block)
+            p = etree.SubElement(it, "paragraph")
+            copy_block_coords_and_style(p, block)
+            p.text = normalize_text(chunk)
 
-        # compute list bbox for neatness
-        bb = bbox_union(lst.findall("./item"))
-        if bb:
-            x,y,w,h = bb
-            lst.set("x", f"{x:.2f}"); lst.set("y", f"{y:.2f}")
-            lst.set("w", f"{w:.2f}"); lst.set("h", f"{h:.2f}")
+        return True
 
-    return True
+    # 2) multiple ALPHA items like: "a) foo b) bar c) baz"
+    alp_pat = re.compile(r"(?i)(?<![A-Za-z0-9])([a-z])\)\s+")
 
+    alp_ms = list(alp_pat.finditer(full))
 
+    if len(alp_ms) >= 2:
+        head = full[:alp_ms[0].start()].strip()
+        if head:
+            emit_paragraph(head)
+
+        lst = etree.SubElement(body_el, "list", type="ordered", marker="lower-alpha")
+        start_alpha = ord(alp_ms[0].group(1).lower()) - ord('a') + 1
+        lst.set("start", str(start_alpha))
+
+        for i, m in enumerate(alp_ms):
+            start = m.end()
+            end   = alp_ms[i + 1].start() if i + 1 < len(alp_ms) else len(full)
+            chunk = full[start:end].strip()
+            it = etree.SubElement(lst, "item")
+            copy_block_coords_and_style(it, block)
+            p = etree.SubElement(it, "paragraph")
+            copy_block_coords_and_style(p, block)
+            p.text = normalize_text(chunk)
+
+        return True
+
+    # 3) intro + single bullet: "...: - foo"
+    m = re.search(r"(?s)^(?P<intro>.+?[.:;])\s*(?P<ch>[•·▪‣\-–—])\s+(?P<rest>.+)$", full)
+    if m:
+        emit_paragraph(m.group("intro").rstrip())
+        ch = m.group("ch")
+        marker = "bullet" if ch in ("•", "·", "▪", "‣") else "dash"
+        lst = etree.SubElement(body_el, "list", type="unordered", marker=marker)
+        it = etree.SubElement(lst, "item")
+        copy_block_coords_and_style(it, block)
+        p = etree.SubElement(it, "paragraph")
+        copy_block_coords_and_style(p, block)
+        p.text = normalize_text(m.group("rest"))
+        return True
+
+    return False
 
 def build_tree_direct(
     pdf_path: Path, metadata_path: Optional[Path], start_page_cli: Optional[int],
@@ -890,74 +952,134 @@ def build_tree_direct(
 
         # Body content
         heading_markers_on_page: List[str] = []
+
         class ListState:
             def __init__(self):
-                self.decimal_open=False; self.decimal_start=None
-                self.alpha_open=False;   self.alpha_start=None
+                self.decimal_open = False; self.decimal_start = None
+                self.alpha_open   = False; self.alpha_start   = None
+                self.ul_open      = False
             def close_alpha(self):
-                self.alpha_open=False; self.alpha_start=None
+                self.alpha_open = False; self.alpha_start = None
             def close_decimal(self):
-                self.close_alpha(); self.decimal_open=False; self.decimal_start=None
+                self.close_alpha(); self.decimal_open = False; self.decimal_start = None
+            def close_ul(self):
+                self.ul_open = False
 
         state = ListState()
         current_decimal_list_el = None
         current_alpha_list_el   = None
+        current_ul_list_el      = None
 
-        for b in [x for x in page_blocks if x.get("role")!="header"]:
+        for b in [x for x in page_blocks if x.get("role") != "header"]:
             txt = (b.get("text") or "").strip()
             if not txt: continue
-            if b.get("role")=="footer" and PAGE_NUM_RE.match(txt):
-                continue
+            if b.get("role") == "footer" and PAGE_NUM_RE.match(txt): continue
 
+            # horizontal rule / separator
             if RULE_RE.search(txt or ""):
-                add_separator(body_el, b); continue
-            
-            # split mixed blocks (paragraph + inline list) into proper structures
-            if maybe_emit_inline_list(body_el, b, copy_inline_spans_from_runs):
+                state.close_ul(); current_ul_list_el = None
+                add_separator(body_el, b)
                 continue
 
+            # split mixed blocks (intro + bullet on separate visual lines inside one PDF block)
+            if maybe_emit_inline_list(body_el, b, copy_inline_spans_from_runs):
+                state.close_ul(); current_ul_list_el = None
+                state.close_alpha(); current_alpha_list_el = None
+                continue
 
-            if b.get("kind")=="heading":
+            # ---- bullet list (• · ▪ ‣ - – — etc.) ----
+            m_bul = BULLET_RE.match(txt)
+            if m_bul:
+                if not state.ul_open:
+                    ch = m_bul.group(1)
+                    marker = "bullet" if ch in ("•","·","▪","‣") else "dash"
+                    current_ul_list_el = etree.SubElement(body_el, "list", type="unordered", marker=marker)
+                    state.ul_open = True
+                    state.close_alpha(); current_alpha_list_el = None  # don't nest bullets under alpha by default
+
+                content = (m_bul.group(2) or "").strip()
+                it = etree.SubElement(current_ul_list_el, "item")
+                copy_block_coords_and_style(it, b)
+                p = etree.SubElement(it, "paragraph")
+                copy_block_coords_and_style(p, b)
+                p.text = content
+                copy_inline_spans_from_runs(p, b.get("runs"))
+                continue
+
+            # headings
+            if b.get("kind") == "heading":
+                state.close_ul(); current_ul_list_el = None
                 heading_markers_on_page.extend(extract_sup_markers_from_runs(b.get("runs")))
-                h_el = etree.SubElement(body_el, "heading", level=str(b.get("level","1")))
+                h_el = etree.SubElement(body_el, "heading", level=str(b.get("level", "1")))
                 copy_block_coords_and_style(h_el, b)
                 h_el.text = txt
                 copy_inline_spans_from_runs(h_el, b.get("runs"))
-                state.close_decimal(); current_decimal_list_el=None; current_alpha_list_el=None
+                state.close_decimal(); current_decimal_list_el = None
+                current_alpha_list_el = None
                 continue
 
-            m_dec = DECIMAL_RE.match(txt); m_alp = ALPHA_RE.match(txt)
+            # numeric list (close UL first)
+            state.close_ul(); current_ul_list_el = None
+            m_dec = DECIMAL_RE.match(txt)
+
+
+
             if m_dec:
-                num = int(m_dec.group(1)); content = m_dec.group(2).strip()
+                # if this block actually contains 2+ numeric items, split here too
+                dec_ms = list(re.finditer(r"(?<!\d)(\d+)\.\s+", txt))
+                parts = []
+                if len(dec_ms) >= 2:
+                    for i, m in enumerate(dec_ms):
+                        start = m.end()
+                        end   = dec_ms[i + 1].start() if i + 1 < len(dec_ms) else len(txt)
+                        chunk = txt[start:end].strip()
+                        cut = re.search(r"\s\d+\.\d+\s", chunk)
+                        if cut:
+                            chunk = chunk[:cut.start()].rstrip()
+                        parts.append((int(m.group(1)), chunk))
+                else:
+                    parts = [(int(m_dec.group(1)), m_dec.group(2).strip())]
+
                 if not state.decimal_open:
                     current_decimal_list_el = etree.SubElement(body_el, "list", type="ordered", marker="decimal")
-                    state.decimal_open=True; state.decimal_start=num
-                    current_decimal_list_el.set("start", str(num))
-                elif state.decimal_start is None:
-                    current_decimal_list_el.set("start", str(num)); state.decimal_start=num
-                it = etree.SubElement(current_decimal_list_el, "item")
-                copy_block_coords_and_style(it, b)
-                p = etree.SubElement(it, "paragraph"); copy_block_coords_and_style(p, b); p.text = content
-                state.close_alpha(); current_alpha_list_el=None
+                    state.decimal_open = True
+                    current_decimal_list_el.set("start", str(parts[0][0]))
+
+                for _, content in parts:
+                    it = etree.SubElement(current_decimal_list_el, "item")
+                    copy_block_coords_and_style(it, b)
+                    p = etree.SubElement(it, "paragraph")
+                    copy_block_coords_and_style(p, b)
+                    p.text = content
+
+                state.close_alpha(); current_alpha_list_el = None
                 continue
 
+
+            # alpha sublist (close UL first)
+            state.close_ul(); current_ul_list_el = None
+            m_alp = ALPHA_RE.match(txt)
             if m_alp:
                 alpha = m_alp.group(1); content = m_alp.group(2).strip()
-                parent=None
+                parent = None
                 if state.decimal_open and current_decimal_list_el is not None:
                     items = current_decimal_list_el.findall("./item")
                     if items: parent = items[-1]
                 if not state.alpha_open or current_alpha_list_el is None:
                     list_parent = parent if parent is not None else body_el
                     current_alpha_list_el = etree.SubElement(list_parent, "list", type="ordered", marker="lower-alpha")
-                    start = ord(alpha)-ord('a')+1
+                    start = ord(alpha) - ord('a') + 1
                     current_alpha_list_el.set("start", str(start))
-                    state.alpha_open=True; state.alpha_start=start
+                    state.alpha_open = True; state.alpha_start = start
                 it = etree.SubElement(current_alpha_list_el, "item")
                 copy_block_coords_and_style(it, b)
-                p = etree.SubElement(it, "paragraph"); copy_block_coords_and_style(p, b); p.text = content
+                p = etree.SubElement(it, "paragraph")
+                copy_block_coords_and_style(p, b)
+                p.text = content
                 continue
 
+            # normal paragraph (close UL)
+            state.close_ul(); current_ul_list_el = None
             para = etree.SubElement(body_el, "paragraph")
             copy_block_coords_and_style(para, b)
             para.text = txt
