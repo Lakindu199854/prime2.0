@@ -1,0 +1,16 @@
+[project]
+name = "pdf2tree"
+version = "0.1.0"
+requires-python = ">=3.9"
+description = "Direct PDF -> Tree XML converter (no intermediate XML)"
+dependencies = ["lxml", "PyMuPDF>=1.23"]
+
+[project.scripts]
+pdf2treexml = "pdf2tree.cli:main"
+
+[tool.black]
+line-length = 100
+
+[tool.ruff]
+line-length = 100
+select = ["E","F","I","UP"]

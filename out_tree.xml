@@ -140,19 +140,19 @@
         <table x="134.43" y="252.80" w="336.84" h="58.77" rows="4" cols="14">
           <tr>
             <td></td>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
           </tr>
           <tr>
             <td></td>
@@ -163,28 +163,28 @@
             <td></td>
             <td></td>
             <td></td>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
           </tr>
           <tr>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
             <td></td>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
           </tr>
           <tr>
             <td></td>
@@ -207,11 +207,11 @@
           <tr>
             <td>Jahr</td>
             <td>Wohnungsgrößenklassen in qm (Medianwerte)</td>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
           </tr>
           <tr>
             <td></td>
@@ -316,12 +316,12 @@
           <tr>
             <td>Jahr</td>
             <td>Veränderung der Angebotsmieten (netto-kalt) in Hamburg</td>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
           </tr>
           <tr>
             <td></td>
@@ -344,7 +344,7 @@
             <td>Median</td>
           </tr>
           <tr>
-            <td/>
+            <td>None</td>
             <td>23%</td>
             <td>30%</td>
             <td>33%</td>
@@ -408,9 +408,9 @@
             <td>Netto-Kalt-Miete 2024 (Median)</td>
             <td>Netto-Kalt-Miete 2018 (Median)</td>
             <td>Erhöhung Netto-Kalt- Miete 2018-2024</td>
-            <td/>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
             <td>Steigerung Bundesdurschmit</td>
             <td>Anstieg 2018-2024 in %</td>
           </tr>
@@ -419,8 +419,8 @@
             <td>22,40 €</td>
             <td>16,04 €</td>
             <td>6,36</td>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
             <td>€</td>
             <td>2,48</td>
             <td>40%</td>
@@ -430,9 +430,9 @@
             <td>20,07 €</td>
             <td>15,64 €</td>
             <td></td>
-            <td/>
+            <td>None</td>
             <td>4,43 €</td>
-            <td/>
+            <td>None</td>
             <td>2,48</td>
             <td>28%</td>
           </tr>
@@ -442,8 +442,8 @@
             <td>14,30 €</td>
             <td></td>
             <td>3,70 €</td>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
             <td>2,48</td>
             <td>26%</td>
           </tr>
@@ -453,8 +453,8 @@
             <td>14,39 €</td>
             <td></td>
             <td>3,27 €</td>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
             <td>2,48</td>
             <td>23%</td>
           </tr>
@@ -464,8 +464,8 @@
             <td>14,08 €</td>
             <td></td>
             <td>3,95 €</td>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
             <td>2,48</td>
             <td>28%</td>
           </tr>
@@ -475,8 +475,8 @@
             <td>13,95 €</td>
             <td></td>
             <td>3,09 €</td>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
             <td>2,48</td>
             <td>22%</td>
           </tr>
@@ -485,9 +485,9 @@
             <td>21,00 €</td>
             <td>13,91 €</td>
             <td>7,09 €</td>
-            <td/>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
             <td>2,48</td>
             <td>51%</td>
           </tr>
@@ -497,8 +497,8 @@
             <td>13,95 €</td>
             <td></td>
             <td>3,38 €</td>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
             <td>2,48</td>
             <td>24%</td>
           </tr>
@@ -508,8 +508,8 @@
             <td>13,85 €</td>
             <td></td>
             <td>2,93 €</td>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
             <td>2,48</td>
             <td>21%</td>
           </tr>
@@ -519,8 +519,8 @@
             <td>13,32 €</td>
             <td></td>
             <td>3,73 €</td>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
             <td>2,48</td>
             <td>28%</td>
           </tr>
@@ -529,9 +529,9 @@
             <td>16,84 €</td>
             <td>12,54 €</td>
             <td></td>
-            <td/>
+            <td>None</td>
             <td>4,30 €</td>
-            <td/>
+            <td>None</td>
             <td>2,48</td>
             <td>34%</td>
           </tr>
@@ -541,8 +541,8 @@
             <td>11,91 €</td>
             <td></td>
             <td>3,69 €</td>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
             <td>2,48</td>
             <td>31%</td>
           </tr>
@@ -552,8 +552,8 @@
             <td>11,88 €</td>
             <td></td>
             <td>2,50 €</td>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
             <td>2,48</td>
             <td>21%</td>
           </tr>
@@ -563,8 +563,8 @@
             <td>10,96 €</td>
             <td></td>
             <td>3,71 €</td>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
             <td>2,48</td>
             <td>34%</td>
           </tr>
@@ -574,8 +574,8 @@
             <td>9,96 €</td>
             <td></td>
             <td>3,53 €</td>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
             <td>2,48</td>
             <td>35%</td>
           </tr>
@@ -585,8 +585,8 @@
             <td>11,19 €</td>
             <td></td>
             <td>2,71 €</td>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
             <td>2,48</td>
             <td>24%</td>
           </tr>
@@ -596,8 +596,8 @@
             <td>11,39 €</td>
             <td></td>
             <td>3,50 €</td>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
             <td>2,48</td>
             <td>31%</td>
           </tr>
@@ -607,8 +607,8 @@
             <td>10,97 €</td>
             <td></td>
             <td>3,30 €</td>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
             <td>2,48</td>
             <td>30%</td>
           </tr>
@@ -618,8 +618,8 @@
             <td>11,17 €</td>
             <td></td>
             <td>3,16 €</td>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
             <td>2,48</td>
             <td>28%</td>
           </tr>
@@ -629,8 +629,8 @@
             <td>10,50 €</td>
             <td></td>
             <td>3,43 €</td>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
             <td>2,48</td>
             <td>33%</td>
           </tr>
@@ -640,8 +640,8 @@
             <td>10,86 €</td>
             <td></td>
             <td>2,13 €</td>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
             <td>2,48</td>
             <td>20%</td>
           </tr>
@@ -651,8 +651,8 @@
             <td>10,09 €</td>
             <td></td>
             <td>3,78 €</td>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
             <td>2,48</td>
             <td>37%</td>
           </tr>
@@ -662,8 +662,8 @@
             <td>9,92 €</td>
             <td></td>
             <td>3,62 €</td>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
             <td>2,48</td>
             <td>36%</td>
           </tr>
@@ -673,8 +673,8 @@
             <td>9,52 €</td>
             <td></td>
             <td>2,51 €</td>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
             <td>2,48</td>
             <td>26%</td>
           </tr>
@@ -684,8 +684,8 @@
             <td>9,97 €</td>
             <td></td>
             <td>3,22 €</td>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
             <td>2,48</td>
             <td>32%</td>
           </tr>
@@ -695,8 +695,8 @@
             <td>10,05 €</td>
             <td></td>
             <td>3,55 €</td>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
             <td>2,48</td>
             <td>35%</td>
           </tr>
@@ -706,8 +706,8 @@
             <td>9,80 €</td>
             <td></td>
             <td>2,57 €</td>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
             <td>2,48</td>
             <td>26%</td>
           </tr>
@@ -717,8 +717,8 @@
             <td>9,56 €</td>
             <td></td>
             <td>2,82 €</td>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
             <td>2,48</td>
             <td>29%</td>
           </tr>
@@ -728,8 +728,8 @@
             <td>9,45 €</td>
             <td></td>
             <td>3,18 €</td>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
             <td>2,48</td>
             <td>34%</td>
           </tr>
@@ -739,8 +739,8 @@
             <td>8,77 €</td>
             <td></td>
             <td>2,34 €</td>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
             <td>2,48</td>
             <td>27%</td>
           </tr>
@@ -750,8 +750,8 @@
             <td>8,58 €</td>
             <td></td>
             <td>1,83 €</td>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
             <td>2,48</td>
             <td>21%</td>
           </tr>
@@ -850,128 +850,128 @@
             <td>Hamburg</td>
             <td></td>
             <td>9,16 €</td>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
           </tr>
           <tr>
             <td></td>
             <td>Bayern</td>
             <td></td>
             <td>8,74 €</td>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
           </tr>
           <tr>
             <td></td>
             <td>Hessen</td>
             <td></td>
             <td>8,21 €</td>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
           </tr>
           <tr>
             <td></td>
             <td>Baden-Württemberg</td>
             <td></td>
             <td>8,13 €</td>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
           </tr>
           <tr>
             <td></td>
             <td>Berlin</td>
             <td></td>
             <td>7,67€</td>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
           </tr>
           <tr>
             <td></td>
             <td>Schleswig-Holstein</td>
             <td></td>
             <td>7,41 €</td>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
           </tr>
           <tr>
             <td></td>
             <td>Bremen</td>
             <td></td>
             <td>7,34 €</td>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
           </tr>
           <tr>
             <td></td>
             <td>Nordrhein-Westfalen</td>
             <td></td>
             <td>6,82 €</td>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
           </tr>
           <tr>
             <td></td>
             <td>Rheinland-Pfalz</td>
             <td></td>
             <td>6,75 €</td>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
           </tr>
           <tr>
             <td></td>
             <td>Niedersachsen</td>
             <td></td>
             <td>6,56 €</td>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
           </tr>
           <tr>
             <td></td>
             <td>Brandenburg</td>
             <td></td>
             <td>6,21 €</td>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
           </tr>
           <tr>
             <td></td>
             <td>Saarland</td>
             <td></td>
             <td>6,12 €</td>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
           </tr>
           <tr>
             <td></td>
             <td>Mecklenburg-Vorpommern</td>
             <td></td>
             <td>5,91 €</td>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
           </tr>
           <tr>
             <td></td>
             <td>Sachsen</td>
             <td></td>
             <td>5,72 €</td>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
           </tr>
           <tr>
             <td></td>
             <td>Thüringen</td>
             <td></td>
             <td>5,65 €</td>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
           </tr>
           <tr>
             <td></td>
             <td>Sachsen-Anhalt</td>
             <td></td>
             <td>5,38 €</td>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
           </tr>
         </table>
       </body>
@@ -1262,9 +1262,9 @@
             <td></td>
             <td></td>
             <td></td>
-            <td/>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
           </tr>
           <tr>
             <td></td>
@@ -1272,152 +1272,152 @@
             <td>92</td>
             <td></td>
             <td></td>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
           </tr>
           <tr>
             <td></td>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
           </tr>
           <tr>
             <td>36</td>
             <td></td>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
           </tr>
           <tr>
             <td></td>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
           </tr>
           <tr>
             <td>33</td>
             <td></td>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
           </tr>
           <tr>
             <td></td>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
           </tr>
           <tr>
             <td>31</td>
             <td></td>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
           </tr>
           <tr>
             <td></td>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
           </tr>
           <tr>
             <td>24</td>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
           </tr>
           <tr>
             <td></td>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
           </tr>
           <tr>
             <td>24</td>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
           </tr>
           <tr>
             <td></td>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
           </tr>
           <tr>
             <td>23</td>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
           </tr>
           <tr>
             <td></td>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
           </tr>
           <tr>
             <td>22</td>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
           </tr>
           <tr>
             <td></td>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
           </tr>
           <tr>
             <td>22</td>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
+            <td>None</td>
           </tr>
         </table>
       </body>
