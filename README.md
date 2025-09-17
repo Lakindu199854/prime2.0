@@ -1,4 +1,4 @@
-Input files ---->input.pdf
-            ---->meta.xml
+Input files ---->input.pdf,meta.xml
 
 Output files ----> output.xml
+
