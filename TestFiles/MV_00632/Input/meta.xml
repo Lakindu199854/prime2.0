@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE gesetz PUBLIC "-//MBO//DTD gesetz 1.0//DE" "http://dtd.mbo-verlag.de/dtd10/gesetz.dtd">
+<gesetz amt-akt-abk="WPrVO-PFF" amt-akt-kb="Weiterbildungs- und Prüfungsverordnung für Pflegefachpersonen" mbo-akt-abk="WPrVO-PFF,MV" mbo-akt-kb="Weiterbildungs- und Prüfungsverordnung für Pflegefachpersonen" normgeber="Mecklenburg-Vorpommern" ordnungszeichen="Paragraf" rang-texttyp="Innerstaatliches_Recht__Landesrecht__Rechtsverordnungen" rechtsakt="konsolidiert" rechtsstand="01.08.2025" status="regulaer" verkuendung="10.07.2025">
+   <meta>
+      <kategoriezuordnung>
+         <offizielle-kategorie>212-3-8</offizielle-kategorie>
+      <taxonomien art="rechtsgebiete" herkunft="manuell"><taxonomie-eintrag uri="http://taxonomy.wolterskluwer.de/law/10425"/><taxonomie-eintrag uri="http://taxonomy.wolterskluwer.de/law/10423"/><taxonomie-eintrag uri="http://taxonomy.wolterskluwer.de/law/11912"/></taxonomien></kategoriezuordnung>
+      <produktzuordnung>
+         <produktname/>
+      </produktzuordnung>
+   </meta>
+   <kopf>
+      <erstfassung gilt-ab="01.08.2025">
+         <normueberschrift>Weiterbildungs- und Prüfungsverordnung für Pflegefachpersonen der Intensivpflege sowie Pflege von Menschen mit Schlaganfall, Anästhesie, neonatologischen und pädiatrischen Intensivpflege, Onkologie, Notfallpflege und für Atmungstherapeutinnen und Atmungstherapeuten</normueberschrift>
+         <kurzbezeichnung herausgeber="amtlich">Weiterbildungs- und Prüfungsverordnung für Pflegefachpersonen</kurzbezeichnung>
+         <kurzbezeichnung herausgeber="MBO">Weiterbildungs- und Prüfungsverordnung für Pflegefachpersonen</kurzbezeichnung>
+         <abkuerzung herausgeber="amtlich">WPrVO-PFF</abkuerzung>
+         <abkuerzung herausgeber="MBO">WPrVO-PFF,MV</abkuerzung>
+         <ausfertigungsdatum datum="27.06.2025">Vom</ausfertigungsdatum>
+         <verkuendung>
+            <verkblatt blatt="MV-GVOBlMV" jahrgang="2025" nummer="12" seite="312"/>
+            <verkdatum datum="10.07.2025"/>
+         </verkuendung>
+      </erstfassung>
+      <aenderungsanweisungen>
+         <aenderungsanweisung id="a009952c-41bb-4391-8132-fbb060c02b4b"/>
+      </aenderungsanweisungen>
+   </kopf>
+   <rumpf wiedergegeben="ja">
+      <einzelvorschrift gilt-ab="01.08.2025">
+         <zaehlung normiert="0" nr="0" ordnungszeichen="Paragraf">WPrVO-PFF § (Titel, Fassung, Einleitung)</zaehlung>
+         <ueberschrift herausgeber="amtlich">Weiterbildungs- und Prüfungsverordnung für Pflegefachpersonen der Intensivpflege sowie Pflege von Menschen mit Schlaganfall, Anästhesie, neonatologischen und pädiatrischen Intensivpflege, Onkologie, Notfallpflege und für Atmungstherapeutinnen und Atmungstherapeuten<zeilenumbruch/>(WPrVO-PFF - Weiterbildungs- und Prüfungsverordnung für Pflegefachpersonen)</ueberschrift>
+         <jurabsatz>
+            <nummer>0</nummer>
+            <absatz>Vom 27. Juni 2025 (GVOBl. M-V S. 312)</absatz>
+         </jurabsatz>
+      </einzelvorschrift>
+   </rumpf>
+</gesetz>
