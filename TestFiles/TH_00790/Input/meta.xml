@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE gesetz PUBLIC "-//MBO//DTD gesetz 1.0//DE" "http://dtd.mbo-verlag.de/dtd10/gesetz.dtd">
+<gesetz amt-akt-abk="RRL-ThürEhrAG" mbo-akt-abk="RRL-ThürEhrAG,TH" mbo-akt-kb="Rahmenrichtlinie-Thüringer Ehrenamtsgesetz" normgeber="Thueringen" ordnungszeichen="Abschnitt" rang-texttyp="Innerstaatliches_Recht__Landesrecht__Verwaltungsvorschriften" rechtsakt="konsolidiert" rechtsstand="11.08.2025" status="regulaer" verkuendung="11.08.2025">
+   <meta>
+      <kategoriezuordnung>
+         <offizielle-kategorie>Neue FN 2025</offizielle-kategorie>
+      <taxonomien art="rechtsgebiete" herkunft="manuell"><taxonomie-eintrag uri="http://taxonomy.wolterskluwer.de/law/12094"/><taxonomie-eintrag uri="http://taxonomy.wolterskluwer.de/law/12051"/></taxonomien></kategoriezuordnung>
+      <produktzuordnung>
+         <produktname/>
+      </produktzuordnung>
+   </meta>
+   <kopf>
+      <erstfassung gilt-ab="11.08.2025" gilt-bis="11.08.2030">
+         <normueberschrift>Rahmenrichtlinie zur Umsetzung des Thüringer Ehrenamtsgesetzes</normueberschrift>
+         <kurzbezeichnung herausgeber="MBO">Rahmenrichtlinie-Thüringer Ehrenamtsgesetz</kurzbezeichnung>
+         <abkuerzung herausgeber="amtlich">RRL-ThürEhrAG</abkuerzung>
+         <abkuerzung herausgeber="MBO">RRL-ThürEhrAG,TH</abkuerzung>
+         <ausfertigungsdatum datum="23.07.2025">Vom</ausfertigungsdatum>
+         <verkuendung>
+            <verkblatt blatt="TH-ThuerStanz" jahrgang="2025" nummer="32" seite="927"/>
+            <verkdatum datum="11.08.2025"/>
+         </verkuendung>
+      </erstfassung>
+      <aenderungsanweisungen>
+         <aenderungsanweisung id="593749ee-e30b-43bc-8331-006eca13de05"/>
+      </aenderungsanweisungen>
+   </kopf>
+   <rumpf wiedergegeben="ja">
+      <einzelvorschrift gilt-ab="11.08.2025" gilt-bis="11.08.2030">
+         <zaehlung normiert="0" nr="0" ordnungszeichen="Abschnitt">RRL-ThürEhrAG Abschnitt (Titel, Fassung, Einleitung)</zaehlung>
+         <ueberschrift herausgeber="amtlich">Rahmenrichtlinie zur Umsetzung des Thüringer Ehrenamtsgesetzes (RRL-ThürEhrAG)</ueberschrift>
+         <jurabsatz>
+            <nummer>0</nummer>
+            <absatz>Vom 23. Juli 2025 (ThürStAnz S. 927)</absatz>
+         </jurabsatz>
+      </einzelvorschrift>
+   </rumpf>
+</gesetz>
