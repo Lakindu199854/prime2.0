@@ -1,0 +1,7 @@
+import tabula
+
+pdf_path="input.pdf"
+
+dfs=tabula.read_pdf(pdf_path,pages=12)
+
+print(dfs[0])
