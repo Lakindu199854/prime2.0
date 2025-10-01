@@ -1,0 +1,1 @@
+Even I have 2 folders for iamgePdfs and textPdfs the scripts are the same.I just want to have 2 folders to test those
