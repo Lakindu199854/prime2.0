@@ -1,0 +1,4 @@
+streamlit
+google-genai       # CRITICAL FIX: This installs the google.genai module
+pydantic           # Needed for the structured schema (ArticleData)
+python-dotenv      # Needed for os.getenv/load_dotenv in extractor.py
